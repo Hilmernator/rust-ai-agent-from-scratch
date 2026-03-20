@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+agent-security = { path = "../agent-security" }
+
 anyhow = "1"
 tokio = { version = "1", features = ["full"] }
 rmcp = { version = "0.13.0", features = ["client", "transport-child-process"] }

@@ -4,13 +4,13 @@ use crate::model::{
     types::{ContentBlock, Message, MessageContent, ModelRequest, ModelResponse, Role, ToolSchema},
 };
 use crate::tools::GetCurrentTime;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use std::io::{self, Write};
 mod model;
 mod tools;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_writer(std::io::stderr)
         .with_ansi(false)
@@ -23,7 +23,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         print!("You: ");
         io::stdout().flush()?;
-
         let mut input = String::new();
         io::stdin().read_line(&mut input)?;
         let input = input.trim();
@@ -37,7 +36,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             content: model::types::MessageContent::Text(input.to_string()),
         });
 
+        let mut inner_iterations: u64 = 0;
+
         loop {
+            inner_iterations += 1;
+
+            if inner_iterations > 10 {
+                return Err(anyhow!("Inner loop max iterations reached"));
+            }
             let request = ModelRequest {
                 model: "claude-opus-4-6".to_string(),
                 max_tokens: 1024,
